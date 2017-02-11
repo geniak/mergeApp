@@ -10,6 +10,8 @@ namespace mergeApp
     {
         static void Main(string[] args)
         {
+			// test commit on Mac
+			Console.WriteLine("Hi, This line was written on Mac");
         }
     }
 }
