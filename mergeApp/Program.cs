@@ -7,6 +7,8 @@ using System.Windows;
 using System.Data.OleDb;
 // Microsoft ADO Ext. 6.0 DLL and Security
 using ADOX;
+using System.IO;
+
 
 namespace mergeApp
 {
@@ -19,7 +21,27 @@ namespace mergeApp
         {
 			// test commit on Mac
 			Console.WriteLine("Hi, This line was written on Mac");
+            
+            string[] filePath = checkFile();
+            Console.Write("There is {0} DB file. Choose Number : ", filePath.Count());
+            
+            try
+            {
+                int selectNum = Int16.Parse(Console.ReadLine());
+                checkData(filePath, selectNum);
+            }
+            catch (Exception err)
+            {
+                Console.WriteLine("Error : {0}", err);
+                Console.Write("There is {0} DB file. Choose Number : ", filePath.Count());
+            }
+            
+            
+            Console.Read();
+        }
 
+        static void createDB()
+        {
             Console.Write("Create DB Name : ");
             string txtDB = Console.ReadLine();
             Catalog myCatalog = new Catalog();
@@ -57,10 +79,7 @@ namespace mergeApp
                 Console.WriteLine(ex.Message, "MakeTable");
             }
             conn.Close();
-
-            Console.Read();
         }
-
         
         static void connectDB()
         {
@@ -100,56 +119,96 @@ namespace mergeApp
 
         }
 
-		static void checkFile()
+		static string[] checkFile()
 		{
-
+            string filePath = Directory.GetCurrentDirectory();
+            Console.WriteLine(filePath);
+            string searchPattern = "*.accdb";
+            string[] searchFile = Directory.GetFiles(filePath, searchPattern);
+            
+            if (searchFile.Count() != 0)
+            {
+                Console.WriteLine("Find file");
+                
+                for (int i = 0; i < searchFile.Count(); i++)
+                {
+                    Console.WriteLine(searchFile[i]);
+                }
+                return searchFile;
+            }
+            else
+            {
+                Console.WriteLine("There is no such file");
+                return null;
+            }
+            
 		}
 
-		static void checkData()
+		static void checkData(string[] FilePath, int dbNum)
 		{
+            string conInfo =
+            (@"Provider=Microsoft.ACE.OLEDB.12.0;" +
+             @"Data Source=" + FilePath[dbNum+1] +";" +
+             @"Mode=ReadWrite;");
 
-		}
+            OleDbConnection conn = new OleDbConnection(conInfo);
+            OleDbCommand cmd = new OleDbCommand();
 
-		// sql 명령어
-		// Database create/show
-		// mysql> CREATE DATABASE dbname;
-		// mysql> SHOW DATABASE;
-		// mysql> USE dbname; // declare specific database
-		// DROP DATABASE [IF EXISTS] dbname; // delete database
+            conn.Open();
+            Console.WriteLine("DB opened");
+            cmd.Connection = conn;
+            cmd.CommandText = "SELECT * FROM ";
+            OleDbDataReader readDB = cmd.ExecuteReader(System.Data.CommandBehavior.CloseConnection);
+            while (readDB.Read())
+            {
+                Console.WriteLine()
+            }
+            //cmd.CommandText = 
 
-		// Create & Show Table
-		// mysql> CREATE TABLE tablename (
-		// column_name1 INT PRIMARY KEY AUTO_INCREMENT,
-		// column_name2 VARCHAR(15) NOT NULL,
-		// column_name3 INT
-		// ) ENGINE=INNODB;
-		// mysql> SHOW TABLES;
-		// mysql> EXPLAIN tablesname;
-		// mysql> DESCRIBE tablename;
-		// mysql> RENAME TABLE tablename1 TO tablename2[, tablename3 TO tablename4];
-		// mysql> DROP TABLE [IF EXISTS] tablename;
 
-		// Insert
-		// mysql> INSERT INTO tablename VALUES(value1, value2, ...);
-		// mysql> INSERT INTO tablename (col1, col2, ...) VALUES(value1, value2, ...);
 
-		// Select
-		// mysql> SELECT col1, col2, ... FROM tablename;
-		// you can use * instead of col, it means select all column.
-		// mysql> SELECT col1 AS 'Name', col2 AS 'Score' FROM grade;
-		// mysql> SELECT * FROM tablename ORDER BY col1 DESC;
-		// mysql> SELECT col1, korean + math english AS 'Total Score' FROM tablename ORDER BY 'Total Score' ASC;
-		// DESC : descending order, ASC : ascending order;
-		// mysql> SELECT * FROM grade WHERE korean < 90;
-		// mysql> SELECT * FROM grade LIMIT 10;
-		// take 10 result from first
-		// mysql> SELECT * FROM grade LIMIT 100, 10;
-		// take 10 result from 100th. ( records are start from 0 )
+        }
 
-		// Update
-		// mysql> UPDATE tablename SET col1=newvalue WHERE condition
+        // sql 명령어
+        // Database create/show
+        // mysql> CREATE DATABASE dbname;
+        // mysql> SHOW DATABASE;
+        // mysql> USE dbname; // declare specific database
+        // DROP DATABASE [IF EXISTS] dbname; // delete database
 
-		// Delete
-		// mysql> DELETE FROM tablename WHERE condition
+        // Create & Show Table
+        // mysql> CREATE TABLE tablename (
+        // column_name1 INT PRIMARY KEY AUTO_INCREMENT,
+        // column_name2 VARCHAR(15) NOT NULL,
+        // column_name3 INT
+        // ) ENGINE=INNODB;
+        // mysql> SHOW TABLES;
+        // mysql> EXPLAIN tablesname;
+        // mysql> DESCRIBE tablename;
+        // mysql> RENAME TABLE tablename1 TO tablename2[, tablename3 TO tablename4];
+        // mysql> DROP TABLE [IF EXISTS] tablename;
+
+        // Insert
+        // mysql> INSERT INTO tablename VALUES(value1, value2, ...);
+        // mysql> INSERT INTO tablename (col1, col2, ...) VALUES(value1, value2, ...);
+
+        // Select
+        // mysql> SELECT col1, col2, ... FROM tablename;
+        // you can use * instead of col, it means select all column.
+        // mysql> SELECT col1 AS 'Name', col2 AS 'Score' FROM grade;
+        // mysql> SELECT * FROM tablename ORDER BY col1 DESC;
+        // mysql> SELECT col1, korean + math english AS 'Total Score' FROM tablename ORDER BY 'Total Score' ASC;
+        // DESC : descending order, ASC : ascending order;
+        // mysql> SELECT * FROM grade WHERE korean < 90;
+        // mysql> SELECT * FROM grade LIMIT 10;
+        // take 10 result from first
+        // mysql> SELECT * FROM grade LIMIT 100, 10;
+        // take 10 result from 100th. ( records are start from 0 )
+
+        // Update
+        // mysql> UPDATE tablename SET col1=newvalue WHERE condition
+
+        // Delete
+        // mysql> DELETE FROM tablename WHERE condition
     }
 }
