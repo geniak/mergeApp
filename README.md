@@ -2,8 +2,8 @@
 
 ### Tip
 
-/'
-// sql 명령어
+
+    // sql 명령어
         // Database create/show
         // mysql> CREATE DATABASE dbname;
         // mysql> SHOW DATABASE;
