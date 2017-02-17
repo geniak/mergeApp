@@ -8,6 +8,8 @@ using System.Data.OleDb;
 // Microsoft ADO Ext. 6.0 DLL and Security
 using ADOX;
 using System.IO;
+using Microsoft.Office.Interop.Access.Dao;
+using System.Data;
 
 
 namespace mergeApp
@@ -21,7 +23,16 @@ namespace mergeApp
         {
 			// test commit on Mac
 			Console.WriteLine("Hi, This line was written on Mac");
-            
+            int answer = 0;
+            while (answer == 0)
+            {
+                answer = answerMachine();
+                if (answer == 1)
+                {
+                    createDB();
+                }
+            }
+            Console.WriteLine("Checking File on System...");
             string[] filePath = checkFile();
             Console.Write("There is {0} DB file. Choose Number : ", filePath.Count());
             
@@ -40,13 +51,39 @@ namespace mergeApp
             Console.Read();
         }
 
+        static int answerMachine()
+        {
+            Console.Write("Do you want Create Standard Database file?( [Y]es or [N]o : ");
+            string answer = Console.ReadLine();
+            answer.ToLower();
+            int retVal;
+            
+            if (answer == "yes" || answer == "y")
+            {
+                retVal = 1;
+            }
+            else if (answer == "no" || answer == "n")
+            {
+                retVal = 2;
+            }
+            else
+            {
+                Console.WriteLine("Your answer is not available.");
+                retVal = 0;
+               
+            }
+            
+            return retVal;
+
+        }
+
         static void createDB()
         {
             Console.Write("Create DB Name : ");
             string txtDB = Console.ReadLine();
             Catalog myCatalog = new Catalog();
             string strProvider = "Provider=Microsoft.ACE.OLEDB.12.0;" +
-                                 "Data Source=\\" + txtDB.ToString() + ".accdb";
+                                 "Data Source=" + txtDB.ToString() + ".accdb";
 
             try
             {
@@ -60,7 +97,7 @@ namespace mergeApp
 
 
             string connStr = "Provider=Microsoft.ACE.OLEDB.12.0;" +
-                                 "Data Source=\\" + txtDB.ToString() + ".accdb; Persist Security Info=False";
+                                 "Data Source=" + txtDB.ToString() + ".accdb; Persist Security Info=False";
 
             OleDbConnection conn = new OleDbConnection(connStr);
             conn.Open();
@@ -132,7 +169,7 @@ namespace mergeApp
                 
                 for (int i = 0; i < searchFile.Count(); i++)
                 {
-                    Console.WriteLine(searchFile[i]);
+                    Console.WriteLine("[{0}] {1}", (i+1), searchFile[i]);
                 }
                 return searchFile;
             }
@@ -148,25 +185,37 @@ namespace mergeApp
 		{
             string conInfo =
             (@"Provider=Microsoft.ACE.OLEDB.12.0;" +
-             @"Data Source=" + FilePath[dbNum+1] +";" +
+             @"Data Source=" + FilePath[dbNum-1] +";" +
              @"Mode=ReadWrite;");
 
             OleDbConnection conn = new OleDbConnection(conInfo);
             OleDbCommand cmd = new OleDbCommand();
 
+            DataSet ds = new DataSet();
+            OleDbDataAdapter adapter = new OleDbDataAdapter("SHOW TABLE", conInfo);
+
             conn.Open();
             Console.WriteLine("DB opened");
             cmd.Connection = conn;
-            cmd.CommandText = "SELECT * FROM ";
+
+            adapter.Fill(ds);
+
+
+
+
+
+            /*
+            cmd.CommandText = "SHOW TABLE";
+            cmd.CommandText = "SELECT * FROM PHONE";
             OleDbDataReader readDB = cmd.ExecuteReader(System.Data.CommandBehavior.CloseConnection);
             while (readDB.Read())
             {
-                Console.WriteLine()
+                Console.WriteLine("Read success");
             }
             //cmd.CommandText = 
+            */
 
-
-
+            conn.Close();
         }
 
         // sql 명령어
