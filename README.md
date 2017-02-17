@@ -2,6 +2,7 @@
 
 ### Tip
 
+/'
 // sql 명령어
         // Database create/show
         // mysql> CREATE DATABASE dbname;
@@ -43,3 +44,6 @@
 
         // Delete
         // mysql> DELETE FROM tablename WHERE condition
+        
+/'
+       
